@@ -1,0 +1,9 @@
+case_id,category,rule_id,file,row_numbers,nurse_id,date,end_date,shift,actual,expected,reason
+unknown_nurse,input,I_UNKNOWN_NURSE,cases/unknown_nurse.csv,5,N99,2026-11-01,,O,N99,registered_nurse_id,N99는 기준 간호사 목록에 없습니다
+duplicate,input,I_SCHEDULE_DUPLICATE,cases/duplicate.csv,2;14,N01,2026-11-01,,,2,1,같은 간호사·날짜 기록이 2행입니다
+missing,input,I_SCHEDULE_MISSING,cases/missing.csv,,N01,2026-11-03,,,0,1,N01의 2026-11-03 기록이 없습니다
+understaffed,assignment,R_MIN_STAFF,cases/understaffed.csv,,,2026-11-01,,N,0,>=1,최소 1명이나 실제 0명으로 1명 부족합니다
+unavailable,assignment,R_UNAVAILABLE,cases/unavailable.csv,6,N02,2026-11-02,,E,E,O,근무 불가 날짜에 E가 배정됐습니다
+consecutive,assignment,R_MAX_CONSECUTIVE,cases/consecutive.csv,2;3;4,N01,2026-11-01,2026-11-03,,3,<=2,3일 연속 근무해 상한 2일을 초과했습니다
+forbidden_transition,assignment,R_FORBIDDEN_TRANSITION,cases/forbidden_transition.csv,8;9,N03,2026-11-02,,D,N->D,not_N->D,전날 N 다음 날 D는 금지 전환입니다
+forbidden_transition,assignment,R_MIN_STAFF,cases/forbidden_transition.csv,,,2026-11-02,,N,0,>=1,최소 1명이나 실제 0명으로 1명 부족합니다

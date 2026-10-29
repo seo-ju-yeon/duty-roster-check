@@ -1,0 +1,9 @@
+case_id,schedule_file,expected_schedule_rows,input_status,input_issue_count,assignment_status,assignment_issue_count
+base,base/schedule.csv,12,VALID,0,PASS,0
+unknown_nurse,cases/unknown_nurse.csv,12,INVALID,1,NOT_RUN,
+duplicate,cases/duplicate.csv,13,INVALID,1,NOT_RUN,
+missing,cases/missing.csv,11,INVALID,1,NOT_RUN,
+understaffed,cases/understaffed.csv,12,VALID,0,FAIL,1
+unavailable,cases/unavailable.csv,12,VALID,0,FAIL,1
+consecutive,cases/consecutive.csv,12,VALID,0,FAIL,1
+forbidden_transition,cases/forbidden_transition.csv,12,VALID,0,FAIL,2
