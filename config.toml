@@ -1,0 +1,28 @@
+# 학습용 가상 기준. 실제 병원 규정·법적 기준이 아닙니다.
+# 사용자 검토 전 초안이며 아직 검사 코드가 이 파일을 읽지는 않습니다.
+rules_version = "0.1-draft"
+fixture_version = "0.1-draft"
+fixture_review_status = "pending_user_review"
+
+[rules]
+allowed_shifts = ["D", "E", "N", "O"]
+working_shifts = ["D", "E", "N"]
+off_shift = "O"
+forbidden_transitions = [["N", "D"]]
+input_error_policy = "skip_all_assignment_checks"
+
+[datasets.small]
+start_date = "2026-11-01"
+end_date = "2026-11-03"
+nurse_count = 4
+max_consecutive_work_days = 2
+
+[datasets.demo]
+# 대표 데이터는 미작성. 기간·인원·상한의 제안만 기록합니다.
+start_date = "2026-11-01"
+end_date = "2026-11-14"
+nurse_count = 12
+max_consecutive_work_days = 5
+
+# 날짜·근무조별 min_staff는 각 데이터의 requirements.csv가 원본입니다.
+# 이 파일에는 같은 값을 중복 저장하지 않습니다.
