@@ -3,9 +3,26 @@ from pathlib import Path
 
 
 def read_schedule(file_path):
-    """CSV 파일을 읽어 각 행을 딕셔너리로 담은 리스트를 반환한다."""
+    """필수 열을 확인하고 CSV의 데이터 행 목록을 반환한다."""
+    required_columns = ["nurse_id", "date", "shift"]
+
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
+        fieldnames = reader.fieldnames
+
+        if fieldnames is None:
+            raise ValueError("입력 오류: CSV 파일에 헤더가 없습니다.")
+
+        missing_columns = []
+
+        for column in required_columns:
+            if column not in fieldnames:
+                missing_columns.append(column)
+
+        if missing_columns:
+            missing_text = ", ".join(missing_columns)
+            raise ValueError(f"입력 오류: 필수 열이 없습니다: {missing_text}")
+
         rows = list(reader)
 
     return rows
