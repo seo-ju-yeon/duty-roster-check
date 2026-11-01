@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def read_schedule(file_path):
-    """필수 열을 확인하고 CSV의 데이터 행 목록을 반환한다."""
+    """필수 열과 중복 열을 확인하고 CSV의 데이터 행 목록을 반환한다."""
     required_columns = ["nurse_id", "date", "shift"]
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
@@ -22,6 +22,20 @@ def read_schedule(file_path):
         if missing_columns:
             missing_text = ", ".join(missing_columns)
             raise ValueError(f"입력 오류: 필수 열이 없습니다: {missing_text}")
+
+        seen_columns = set()
+        duplicate_columns = []
+
+        for column in fieldnames:
+            if column in seen_columns:
+                if column not in duplicate_columns:
+                    duplicate_columns.append(column)
+            else:
+                seen_columns.add(column)
+
+        if duplicate_columns:
+            duplicate_text = ", ".join(duplicate_columns)
+            raise ValueError(f"입력 오류: 중복된 열 이름이 있습니다: {duplicate_text}")
 
         rows = list(reader)
 
