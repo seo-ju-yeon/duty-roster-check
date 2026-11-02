@@ -68,7 +68,8 @@ def read_schedule(file_path):
 
 if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parent
-    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    schedule_path = project_dir / "sample_required_value.csv"
 
     schedule = read_schedule(schedule_path)
 
