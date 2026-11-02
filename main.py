@@ -52,6 +52,15 @@ def read_schedule(file_path):
                     "값 개수가 헤더의 열 개수보다 적습니다."
                 )
 
+            for column in required_columns:
+                value = row[column]
+
+                if value.strip() == "":
+                    raise ValueError(
+                        f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                        f"필수값이 비어 있습니다: {column}"
+                    )
+
             rows.append(row)
 
     return rows
