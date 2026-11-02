@@ -37,7 +37,22 @@ def read_schedule(file_path):
             duplicate_text = ", ".join(duplicate_columns)
             raise ValueError(f"입력 오류: 중복된 열 이름이 있습니다: {duplicate_text}")
 
-        rows = list(reader)
+        rows = []
+
+        for row in reader:
+            if None in row:
+                raise ValueError(
+                    f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                    "값 개수가 헤더의 열 개수보다 많습니다."
+                )
+
+            if None in row.values():
+                raise ValueError(
+                    f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                    "값 개수가 헤더의 열 개수보다 적습니다."
+                )
+
+            rows.append(row)
 
     return rows
 
