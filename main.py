@@ -52,6 +52,15 @@ def read_schedule(file_path):
                     "값 개수가 헤더의 열 개수보다 적습니다."
                 )
 
+            for column in required_columns:
+                value = row[column]
+
+                if value.strip() == "":
+                    raise ValueError(
+                        f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                        f"필수값이 비어 있습니다: {column}"
+                    )
+
             rows.append(row)
 
     return rows
@@ -59,7 +68,8 @@ def read_schedule(file_path):
 
 if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parent
-    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    schedule_path = project_dir / "sample_required_value.csv"
 
     schedule = read_schedule(schedule_path)
 
