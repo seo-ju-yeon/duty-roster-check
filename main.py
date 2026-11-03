@@ -1,6 +1,7 @@
 import csv
 import tomllib
 from pathlib import Path
+from datetime import date
 
 
 # file_path: 읽을 근무표 파일의 경로
@@ -74,6 +75,23 @@ def read_schedule(file_path, allowed_shifts):
                     f"(허용값: {allowed_text})"
                 )
 
+            date_text = row["date"]
+
+            try:
+                schedule_date = date.fromisoformat(date_text)
+            except ValueError:
+                raise ValueError(
+                    f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                    f"날짜가 올바르지 않습니다: {date_text!r} "
+                    "(YYYY-MM-DD 형식의 실제 날짜가 필요합니다.)"
+                )
+
+            if schedule_date.isoformat() != date_text:
+                raise ValueError(
+                    f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                    f"날짜 형식이 YYYY-MM-DD가 아닙니다: {date_text!r}"
+                )
+
             rows.append(row)
 
     return rows
@@ -89,6 +107,7 @@ if __name__ == "__main__":
     allowed_shifts = config["rules"]["allowed_shifts"]
 
     schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "sample_invalid_date.csv"
     # schedule_path = project_dir / "sample_required_value.csv"
     schedule = read_schedule(schedule_path, allowed_shifts)
 
