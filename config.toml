@@ -1,5 +1,5 @@
 # 학습용 가상 기준. 실제 병원 규정·법적 기준이 아닙니다.
-# 사용자 검토 전 초안이며 아직 검사 코드가 이 파일을 읽지는 않습니다.
+# 검사 규칙과 데이터셋별 설정 초안입니다.
 rules_version = "0.1-draft"
 fixture_version = "0.1-draft"
 fixture_review_status = "pending_user_review"

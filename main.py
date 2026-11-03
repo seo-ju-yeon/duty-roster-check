@@ -1,9 +1,12 @@
 import csv
+import tomllib
 from pathlib import Path
 
 
-def read_schedule(file_path):
-    """필수 열과 중복 열을 확인하고 CSV의 데이터 행 목록을 반환한다."""
+# file_path: 읽을 근무표 파일의 경로
+# allowed_shifts: 허용된 근무 상태 목록
+def read_schedule(file_path, allowed_shifts):
+    """CSV의 입력 구조, 필수값, 근무 상태를 확인하고 행 목록을 반환한다."""
     required_columns = ["nurse_id", "date", "shift"]
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
@@ -61,6 +64,16 @@ def read_schedule(file_path):
                         f"필수값이 비어 있습니다: {column}"
                     )
 
+            shift = row["shift"]
+
+            if shift not in allowed_shifts:
+                allowed_text = ", ".join(allowed_shifts)
+                raise ValueError(
+                    f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                    f"허용되지 않은 근무 상태입니다: {shift!r} "
+                    f"(허용값: {allowed_text})"
+                )
+
             rows.append(row)
 
     return rows
@@ -68,10 +81,16 @@ def read_schedule(file_path):
 
 if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parent
-    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
-    schedule_path = project_dir / "sample_required_value.csv"
 
-    schedule = read_schedule(schedule_path)
+    config_path = project_dir / "config.toml"
+    with open(config_path, mode="rb") as file:
+        config = tomllib.load(file)
+
+    allowed_shifts = config["rules"]["allowed_shifts"]
+
+    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "sample_required_value.csv"
+    schedule = read_schedule(schedule_path, allowed_shifts)
 
     print(f"읽은 행 수: {len(schedule)}")
     if schedule:
