@@ -6,9 +6,12 @@ from datetime import date
 
 # file_path: 읽을 근무표 파일의 경로
 # allowed_shifts: 허용된 근무 상태 목록
-def read_schedule(file_path, allowed_shifts):
+def read_schedule(file_path, allowed_shifts, start_date, end_date):
     """CSV의 입력 구조, 필수값, 근무 상태를 확인하고 행 목록을 반환한다."""
     required_columns = ["nurse_id", "date", "shift"]
+
+    if start_date > end_date:
+        raise ValueError("설정 오류: 검사 시작일이 종료일보다 늦습니다.")
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
@@ -92,6 +95,13 @@ def read_schedule(file_path, allowed_shifts):
                     f"날짜 형식이 YYYY-MM-DD가 아닙니다: {date_text!r}"
                 )
 
+            if not start_date <= schedule_date <= end_date:
+                raise ValueError(
+                    f"입력 오류: CSV {reader.line_num}번째 줄의 "
+                    f"날짜가 검사 기간 밖입니다: {date_text!r} "
+                    f"(검사 기간: {start_date} ~ {end_date})"
+                )
+
             rows.append(row)
 
     return rows
@@ -105,11 +115,21 @@ if __name__ == "__main__":
         config = tomllib.load(file)
 
     allowed_shifts = config["rules"]["allowed_shifts"]
+    # 작은 테스트용 설정 묶음을 가져옴
+    dataset_config = config["datasets"]["small"]
 
-    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
-    # schedule_path = project_dir / "sample_invalid_date.csv"
+    start_date = date.fromisoformat(dataset_config["start_date"])
+    end_date = date.fromisoformat(dataset_config["end_date"])
+
+    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    schedule_path = project_dir / "sample_invalid_date.csv"
     # schedule_path = project_dir / "sample_required_value.csv"
-    schedule = read_schedule(schedule_path, allowed_shifts)
+    schedule = read_schedule(
+        schedule_path,
+        allowed_shifts,
+        start_date,
+        end_date,
+    )
 
     print(f"읽은 행 수: {len(schedule)}")
     if schedule:
