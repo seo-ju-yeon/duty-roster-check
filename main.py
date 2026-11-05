@@ -4,6 +4,16 @@ from pathlib import Path
 from datetime import date
 
 
+# 간호사 목록을 읽음
+def read_nurses(file_path):
+    """간호사 CSV를 읽어 각 행을 딕셔너리로 담은 리스트를 반환한다."""
+    with open(file_path, mode="r", encoding="utf-8", newline="") as file:
+        reader = csv.DictReader(file)
+        nurses = list(reader)
+
+    return nurses
+
+
 # file_path: 읽을 근무표 파일의 경로
 # allowed_shifts: 허용된 근무 상태 목록
 def read_schedule(file_path, allowed_shifts, start_date, end_date):
@@ -121,8 +131,17 @@ if __name__ == "__main__":
     start_date = date.fromisoformat(dataset_config["start_date"])
     end_date = date.fromisoformat(dataset_config["end_date"])
 
-    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
-    schedule_path = project_dir / "sample_invalid_date.csv"
+    nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
+    nurses = read_nurses(nurses_path)
+
+    print(f"읽은 간호사 행 수: {len(nurses)}")
+    if nurses:
+        print(f"첫 번째 간호사 행: {nurses[0]}")
+    else:
+        print("읽은 간호사 데이터 행이 없습니다.")
+
+    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "sample_invalid_date.csv"
     # schedule_path = project_dir / "sample_required_value.csv"
     schedule = read_schedule(
         schedule_path,
