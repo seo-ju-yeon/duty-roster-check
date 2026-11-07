@@ -9,6 +9,14 @@ def read_nurses(file_path):
     """간호사 CSV를 읽어 각 행을 딕셔너리로 담은 리스트를 반환한다."""
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
+        fieldnames = reader.fieldnames
+
+        if fieldnames is None:
+            raise ValueError("입력 오류: 간호사 CSV 파일에 헤더가 없습니다.")
+
+        if "nurse_id" not in fieldnames:
+            raise ValueError("입력 오류: 간호사 CSV에 필수 열이 없습니다: nurse_id")
+
         nurses = list(reader)
 
     return nurses
@@ -131,7 +139,9 @@ if __name__ == "__main__":
     start_date = date.fromisoformat(dataset_config["start_date"])
     end_date = date.fromisoformat(dataset_config["end_date"])
 
+    # 간호사 목록 읽기
     nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
+    # nurses_path = project_dir / "sample_invalid_nurses.csv"
     nurses = read_nurses(nurses_path)
 
     print(f"읽은 간호사 행 수: {len(nurses)}")
@@ -140,6 +150,7 @@ if __name__ == "__main__":
     else:
         print("읽은 간호사 데이터 행이 없습니다.")
 
+    # 근무표 읽기
     schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
     # schedule_path = project_dir / "sample_invalid_date.csv"
     # schedule_path = project_dir / "sample_required_value.csv"
