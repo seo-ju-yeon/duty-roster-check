@@ -33,7 +33,22 @@ def read_nurses(file_path):
                 f"입력 오류: 간호사 CSV에 중복된 열 이름이 있습니다: {duplicate_text}"
             )
 
-        nurses = list(reader)
+        nurses = []
+
+        for row in reader:
+            if None in row:
+                raise ValueError(
+                    f"입력 오류: 간호사 CSV {reader.line_num}번째 줄의 "
+                    "값 개수가 헤더의 열 개수보다 많습니다."
+                )
+
+            if None in row.values():
+                raise ValueError(
+                    f"입력 오류: 간호사 CSV {reader.line_num}번째 줄의 "
+                    "값 개수가 헤더의 열 개수보다 적습니다."
+                )
+
+            nurses.append(row)
 
     return nurses
 
@@ -157,7 +172,7 @@ if __name__ == "__main__":
 
     # 간호사 목록 읽기
     nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
-    # nurses_path = project_dir / "sample_invalid_nurses.csv"
+    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_fields.csv"
     nurses = read_nurses(nurses_path)
 
     print(f"읽은 간호사 행 수: {len(nurses)}")
