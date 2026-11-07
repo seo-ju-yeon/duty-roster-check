@@ -72,7 +72,7 @@ def read_nurses(file_path):
 
 # file_path: 읽을 근무표 파일의 경로
 # allowed_shifts: 허용된 근무 상태 목록
-def read_schedule(file_path, allowed_shifts, start_date, end_date):
+def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nurse_ids):
     """CSV의 입력 구조, 필수값, 근무 상태를 확인하고 행 목록을 반환한다."""
     required_columns = ["nurse_id", "date", "shift"]
 
@@ -168,6 +168,14 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date):
                     f"(검사 기간: {start_date} ~ {end_date})"
                 )
 
+            nurse_id = row["nurse_id"]
+
+            if nurse_id not in registered_nurse_ids:
+                raise ValueError(
+                    f"입력 오류: 근무표 CSV {reader.line_num}번째 줄의 "
+                    f"간호사 ID가 기준 목록에 없습니다: {nurse_id!r}"
+                )
+
             rows.append(row)
 
     return rows
@@ -188,15 +196,16 @@ if __name__ == "__main__":
     end_date = date.fromisoformat(dataset_config["end_date"])
 
     # 간호사 목록 읽기
-    # nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
+    nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_fields.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/empty_nurse_id.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/duplicate_nurse_id.csv"
-    nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_nurses.csv"
+    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_nurses.csv"
     nurses = read_nurses(nurses_path)
 
     expected_nurse_count = dataset_config["nurse_count"]
     actual_nurse_count = len(nurses)
+    registered_nurse_ids = {nurses["nurse_id"] for nurses in nurses}
 
     if actual_nurse_count != expected_nurse_count:
         raise ValueError(
@@ -211,7 +220,8 @@ if __name__ == "__main__":
         print("읽은 간호사 데이터 행이 없습니다.")
 
     # 근무표 읽기
-    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    schedule_path = project_dir / "data/fixtures/small/cases/unknown_nurse.csv"
     # schedule_path = project_dir / "sample_invalid_date.csv"
     # schedule_path = project_dir / "sample_required_value.csv"
     schedule = read_schedule(
@@ -219,6 +229,7 @@ if __name__ == "__main__":
         allowed_shifts,
         start_date,
         end_date,
+        registered_nurse_ids,
     )
 
     print(f"읽은 행 수: {len(schedule)}")
