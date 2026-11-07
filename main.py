@@ -34,6 +34,7 @@ def read_nurses(file_path):
             )
 
         nurses = []
+        seen_nurse_ids = set()
 
         for row in reader:
             if None in row:
@@ -55,6 +56,14 @@ def read_nurses(file_path):
                     f"입력 오류: 간호사 CSV {reader.line_num}번째 줄의 "
                     "필수값이 비어 있습니다: nurse_id"
                 )
+
+            if nurse_id in seen_nurse_ids:
+                raise ValueError(
+                    f"입력 오류: 간호사 CSV {reader.line_num}번째 줄의 "
+                    f"간호사 ID가 중복입니다: {nurse_id}"
+                )
+
+            seen_nurse_ids.add(nurse_id)
 
             nurses.append(row)
 
@@ -182,6 +191,7 @@ if __name__ == "__main__":
     nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_fields.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/empty_nurse_id.csv"
+    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/duplicate_nurse_id.csv"
     nurses = read_nurses(nurses_path)
 
     print(f"읽은 간호사 행 수: {len(nurses)}")
