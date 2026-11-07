@@ -17,6 +17,22 @@ def read_nurses(file_path):
         if "nurse_id" not in fieldnames:
             raise ValueError("입력 오류: 간호사 CSV에 필수 열이 없습니다: nurse_id")
 
+        seen_columns = set()
+        duplicate_columns = []
+
+        for column in fieldnames:
+            if column in seen_columns:
+                if column not in duplicate_columns:
+                    duplicate_columns.append(column)
+            else:
+                seen_columns.add(column)
+
+        if duplicate_columns:
+            duplicate_text = ", ".join(duplicate_columns)
+            raise ValueError(
+                f"입력 오류: 간호사 CSV에 중복된 열 이름이 있습니다: {duplicate_text}"
+            )
+
         nurses = list(reader)
 
     return nurses
