@@ -48,6 +48,14 @@ def read_nurses(file_path):
                     "값 개수가 헤더의 열 개수보다 적습니다."
                 )
 
+            nurse_id = row["nurse_id"]
+
+            if nurse_id.strip() == "":
+                raise ValueError(
+                    f"입력 오류: 간호사 CSV {reader.line_num}번째 줄의 "
+                    "필수값이 비어 있습니다: nurse_id"
+                )
+
             nurses.append(row)
 
     return nurses
@@ -173,6 +181,7 @@ if __name__ == "__main__":
     # 간호사 목록 읽기
     nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_fields.csv"
+    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/empty_nurse_id.csv"
     nurses = read_nurses(nurses_path)
 
     print(f"읽은 간호사 행 수: {len(nurses)}")
