@@ -188,11 +188,21 @@ if __name__ == "__main__":
     end_date = date.fromisoformat(dataset_config["end_date"])
 
     # 간호사 목록 읽기
-    nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
+    # nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_fields.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/empty_nurse_id.csv"
     # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/duplicate_nurse_id.csv"
+    nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_nurses.csv"
     nurses = read_nurses(nurses_path)
+
+    expected_nurse_count = dataset_config["nurse_count"]
+    actual_nurse_count = len(nurses)
+
+    if actual_nurse_count != expected_nurse_count:
+        raise ValueError(
+            "입력 오류: 간호사 기준 목록의 인원수가 설정과 다릅니다. "
+            f"기준 {expected_nurse_count}명, 실제 {actual_nurse_count}명"
+        )
 
     print(f"읽은 간호사 행 수: {len(nurses)}")
     if nurses:
