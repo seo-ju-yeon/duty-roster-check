@@ -111,6 +111,7 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
             raise ValueError(f"입력 오류: 중복된 열 이름이 있습니다: {duplicate_text}")
 
         rows = []
+        row_line_numbers = []
 
         for row in reader:
             if None in row:
@@ -177,6 +178,24 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
                 )
 
             rows.append(row)
+            row_line_numbers.append(reader.line_num)
+
+    first_line_by_key = {}
+
+    for row, line_number in zip(rows, row_line_numbers):
+        nurse_id = row["nurse_id"]
+        date_text = row["date"]
+        key = (nurse_id, date_text)
+
+        if key in first_line_by_key:
+            first_line = first_line_by_key[key]
+            raise ValueError(
+                f"입력 오류: 근무표 CSV {line_number}번째 줄의 "
+                f"간호사·날짜 기록이 중복입니다: {nurse_id}, {date_text} "
+                f"(첫 기록: {first_line}번째 줄)"
+            )
+
+        first_line_by_key[key] = line_number
 
     return rows
 
@@ -220,8 +239,9 @@ if __name__ == "__main__":
         print("읽은 간호사 데이터 행이 없습니다.")
 
     # 근무표 읽기
-    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
-    schedule_path = project_dir / "data/fixtures/small/cases/unknown_nurse.csv"
+    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "data/fixtures/small/cases/duplicate.csv"
+    # schedule_path = project_dir / "data/fixtures/small/cases/unknown_nurse.csv"
     # schedule_path = project_dir / "sample_invalid_date.csv"
     # schedule_path = project_dir / "sample_required_value.csv"
     schedule = read_schedule(
