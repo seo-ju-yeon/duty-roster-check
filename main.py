@@ -213,9 +213,27 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
 
 
 def read_requirements(file_path):
-    """필요 인원 CSV의 각 행을 딕셔너리로 읽어 리스트로 반환한다."""
+    """필수 열을 확인하고 필요 인원 CSV의 행을 반환한다."""
+    required_columns = ["date", "shift", "min_staff"]
+
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
+        fieldnames = reader.fieldnames
+
+        if fieldnames is None:
+            raise ValueError("입력 오류: 필요 인원 CSV에 헤더가 없습니다.")
+
+        missing_columns = []
+        for column in required_columns:
+            if column not in fieldnames:
+                missing_columns.append(column)
+
+        if missing_columns:
+            missing_text = ", ".join(missing_columns)
+            raise ValueError(
+                f"입력 오류: 필요 인원 CSV에 필수 열이 없습니다: {missing_text}"
+            )
+
         return list(reader)
 
 
@@ -279,6 +297,7 @@ if __name__ == "__main__":
         print("읽은 데이터 행이 없습니다.")
 
     requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_column.csv"
     requirements = read_requirements(requirements_path)
 
     print(f"읽은 필요 인원 행 수: {len(requirements)}")
