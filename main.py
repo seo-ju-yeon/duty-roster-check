@@ -234,6 +234,22 @@ def read_requirements(file_path):
                 f"입력 오류: 필요 인원 CSV에 필수 열이 없습니다: {missing_text}"
             )
 
+        seen_columns = set()
+        duplicate_columns = []
+
+        for column in fieldnames:
+            if column in seen_columns:
+                if column not in duplicate_columns:
+                    duplicate_columns.append(column)
+            else:
+                seen_columns.add(column)
+
+        if duplicate_columns:
+            duplicate_text = ", ".join(duplicate_columns)
+            raise ValueError(
+                f"입력 오류: 필요 인원 CSV에 중복된 열 이름이 있습니다: {duplicate_text}"
+            )
+
         return list(reader)
 
 
@@ -296,7 +312,8 @@ if __name__ == "__main__":
     else:
         print("읽은 데이터 행이 없습니다.")
 
-    requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_column.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_column.csv"
     requirements = read_requirements(requirements_path)
 
