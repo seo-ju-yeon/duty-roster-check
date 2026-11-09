@@ -212,6 +212,13 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
     return rows
 
 
+def read_requirements(file_path):
+    """필요 인원 CSV의 각 행을 딕셔너리로 읽어 리스트로 반환한다."""
+    with open(file_path, mode="r", encoding="utf-8", newline="") as file:
+        reader = csv.DictReader(file)
+        return list(reader)
+
+
 if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parent
 
@@ -251,8 +258,8 @@ if __name__ == "__main__":
         print("읽은 간호사 데이터 행이 없습니다.")
 
     # 근무표 읽기
-    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
-    schedule_path = project_dir / "data/fixtures/small/cases/missing.csv"
+    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "data/fixtures/small/cases/missing.csv"
     # schedule_path = project_dir / "data/fixtures/small/cases/duplicate.csv"
     # schedule_path = project_dir / "data/fixtures/small/cases/unknown_nurse.csv"
     # schedule_path = project_dir / "sample_invalid_date.csv"
@@ -270,3 +277,10 @@ if __name__ == "__main__":
         print(f"첫 번째 행: {schedule[0]}")
     else:
         print("읽은 데이터 행이 없습니다.")
+
+    requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    requirements = read_requirements(requirements_path)
+
+    print(f"읽은 필요 인원 행 수: {len(requirements)}")
+    if requirements:
+        print(f"첫 번째 필요 인원 행: {requirements[0]}")
