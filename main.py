@@ -1,7 +1,7 @@
 import csv
 import tomllib
 from pathlib import Path
-from datetime import date
+from datetime import date, timedelta
 
 
 # 간호사 목록을 읽음
@@ -197,6 +197,18 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
 
         first_line_by_key[key] = line_number
 
+    day_count = (end_date - start_date).days + 1
+
+    for nurse_id in sorted(registered_nurse_ids):
+        for day_offset in range(day_count):
+            expected_date = start_date + timedelta(days=day_offset)
+            date_text = expected_date.isoformat()
+
+            if (nurse_id, date_text) not in first_line_by_key:
+                raise ValueError(
+                    f"입력 오류: 근무표에 {nurse_id}의 {date_text} 기록이 없습니다."
+                )
+
     return rows
 
 
@@ -239,7 +251,8 @@ if __name__ == "__main__":
         print("읽은 간호사 데이터 행이 없습니다.")
 
     # 근무표 읽기
-    schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    # schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
+    schedule_path = project_dir / "data/fixtures/small/cases/missing.csv"
     # schedule_path = project_dir / "data/fixtures/small/cases/duplicate.csv"
     # schedule_path = project_dir / "data/fixtures/small/cases/unknown_nurse.csv"
     # schedule_path = project_dir / "sample_invalid_date.csv"
