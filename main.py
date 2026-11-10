@@ -265,6 +265,13 @@ def read_requirements(file_path):
                     "값 개수가 헤더의 열 개수보다 적습니다."
                 )
 
+            for column in required_columns:
+                if row[column].strip() == "":
+                    raise ValueError(
+                        f"입력 오류: 필요 인원 CSV {reader.line_num}번째 줄의 "
+                        f"필수값이 비어 있습니다: {column}"
+                    )
+
             rows.append(row)
 
         return rows
@@ -332,6 +339,7 @@ if __name__ == "__main__":
         print("읽은 데이터 행이 없습니다.")
 
     requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/empty_min_staff.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_column.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/too_many_fields.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_column.csv"
