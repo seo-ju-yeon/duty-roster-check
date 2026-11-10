@@ -250,6 +250,25 @@ def read_requirements(file_path):
                 f"입력 오류: 필요 인원 CSV에 중복된 열 이름이 있습니다: {duplicate_text}"
             )
 
+        rows = []
+
+        for row in reader:
+            if None in row:
+                raise ValueError(
+                    f"입력 오류: 필요 인원 CSV {reader.line_num}번째 줄의 "
+                    "값 개수가 헤더의 열 개수보다 많습니다."
+                )
+
+            if None in row.values():
+                raise ValueError(
+                    f"입력 오류: 필요 인원 CSV {reader.line_num}번째 줄의 "
+                    "값 개수가 헤더의 열 개수보다 적습니다."
+                )
+
+            rows.append(row)
+
+        return rows
+
         return list(reader)
 
 
@@ -312,8 +331,9 @@ if __name__ == "__main__":
     else:
         print("읽은 데이터 행이 없습니다.")
 
-    # requirements_path = project_dir / "data/fixtures/small/requirements.csv"
-    requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_column.csv"
+    requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_column.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/too_many_fields.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_column.csv"
     requirements = read_requirements(requirements_path)
 
