@@ -276,8 +276,6 @@ def read_requirements(file_path):
 
         return rows
 
-        return list(reader)
-
 
 if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parent
@@ -303,7 +301,7 @@ if __name__ == "__main__":
 
     expected_nurse_count = dataset_config["nurse_count"]
     actual_nurse_count = len(nurses)
-    registered_nurse_ids = {nurses["nurse_id"] for nurses in nurses}
+    registered_nurse_ids = {nurse["nurse_id"] for nurse in nurses}
 
     if actual_nurse_count != expected_nurse_count:
         raise ValueError(
