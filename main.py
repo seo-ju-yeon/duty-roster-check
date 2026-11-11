@@ -212,8 +212,8 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
     return rows
 
 
-def read_requirements(file_path):
-    """필수 열을 확인하고 필요 인원 CSV의 행을 반환한다."""
+def read_requirements(file_path, working_shifts):
+    """입력 구조·필수값·근무조를 확인하고 필요 인원 CSV의 행을 반환한다."""
     required_columns = ["date", "shift", "min_staff"]
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
@@ -272,6 +272,15 @@ def read_requirements(file_path):
                         f"필수값이 비어 있습니다: {column}"
                     )
 
+            shift = row["shift"]
+            if shift not in working_shifts:
+                allowed_text = ", ".join(working_shifts)
+                raise ValueError(
+                    f"입력 오류: 필요 인원 CSV {reader.line_num}번째 줄의 "
+                    f"허용되지 않은 근무조입니다: {shift!r} "
+                    f"(허용값: {allowed_text})"
+                )
+
             rows.append(row)
 
         return rows
@@ -293,10 +302,6 @@ if __name__ == "__main__":
 
     # 간호사 목록 읽기
     nurses_path = project_dir / "data" / "fixtures" / "small" / "nurses.csv"
-    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_fields.csv"
-    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/empty_nurse_id.csv"
-    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/duplicate_nurse_id.csv"
-    # nurses_path = project_dir / "data/fixtures/small/input_cases/nurses/too_few_nurses.csv"
     nurses = read_nurses(nurses_path)
 
     expected_nurse_count = dataset_config["nurse_count"]
@@ -317,11 +322,6 @@ if __name__ == "__main__":
 
     # 근무표 읽기
     schedule_path = project_dir / "data" / "fixtures" / "small" / "base" / "schedule.csv"
-    # schedule_path = project_dir / "data/fixtures/small/cases/missing.csv"
-    # schedule_path = project_dir / "data/fixtures/small/cases/duplicate.csv"
-    # schedule_path = project_dir / "data/fixtures/small/cases/unknown_nurse.csv"
-    # schedule_path = project_dir / "sample_invalid_date.csv"
-    # schedule_path = project_dir / "sample_required_value.csv"
     schedule = read_schedule(
         schedule_path,
         allowed_shifts,
@@ -336,12 +336,11 @@ if __name__ == "__main__":
     else:
         print("읽은 데이터 행이 없습니다.")
 
-    requirements_path = project_dir / "data/fixtures/small/requirements.csv"
-    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/empty_min_staff.csv"
-    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_column.csv"
-    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/too_many_fields.csv"
-    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_column.csv"
-    requirements = read_requirements(requirements_path)
+    # requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/invalid_shift.csv"
+
+    working_shifts = config["rules"]["working_shifts"]
+    requirements = read_requirements(requirements_path, working_shifts)
 
     print(f"읽은 필요 인원 행 수: {len(requirements)}")
     if requirements:
