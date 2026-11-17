@@ -213,7 +213,7 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
 
 
 def read_requirements(file_path, working_shifts, start_date, end_date, nurse_count):
-    """입력 구조·필수값·근무조·날짜·기간·최소 인원을 확인하고 행을 반환한다."""
+    """입력값과 날짜·근무조 중복을 확인하고 필요 인원 CSV의 행을 반환한다."""
     required_columns = ["date", "shift", "min_staff"]
 
     if start_date > end_date:
@@ -254,6 +254,7 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
             )
 
         rows = []
+        row_line_numbers = []
 
         for row in reader:
             if None in row:
@@ -327,8 +328,26 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
                 )
 
             rows.append(row)
+            row_line_numbers.append(reader.line_num)
 
-        return rows
+    first_line_by_key = {}
+
+    for row, line_number in zip(rows, row_line_numbers):
+        date_text = row["date"]
+        shift = row["shift"]
+        key = (date_text, shift)
+
+        if key in first_line_by_key:
+            first_line = first_line_by_key[key]
+            raise ValueError(
+                f"입력 오류: 필요 인원 CSV {line_number}번째 줄의 "
+                f"날짜·근무조 기록이 중복입니다: {date_text}, {shift} "
+                f"(첫 기록: {first_line}번째 줄)"
+            )
+
+        first_line_by_key[key] = line_number
+
+    return rows
 
 
 if __name__ == "__main__":
@@ -381,10 +400,11 @@ if __name__ == "__main__":
     else:
         print("읽은 데이터 행이 없습니다.")
 
-    # requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_date_shift.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/decimal_min_staff.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/negative_min_staff.csv"
-    requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/excess_min_staff.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/excess_min_staff.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/date_before_period.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/date_after_period.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/invalid_date.csv"
