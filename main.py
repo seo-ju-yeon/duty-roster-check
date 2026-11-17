@@ -213,7 +213,7 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
 
 
 def read_requirements(file_path, working_shifts, start_date, end_date, nurse_count):
-    """입력값과 날짜·근무조 중복을 확인하고 필요 인원 CSV의 행을 반환한다."""
+    """입력값과 날짜·근무조 중복·누락을 확인하고 필요 인원 CSV의 행을 반환한다."""
     required_columns = ["date", "shift", "min_staff"]
 
     if start_date > end_date:
@@ -347,6 +347,19 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
 
         first_line_by_key[key] = line_number
 
+    day_count = (end_date - start_date).days + 1
+
+    for day_offset in range(day_count):
+        expected_date = start_date + timedelta(days=day_offset)
+        date_text = expected_date.isoformat()
+
+        for shift in working_shifts:
+            if (date_text, shift) not in first_line_by_key:
+                raise ValueError(
+                    f"입력 오류: 필요 인원 CSV에 "
+                    f"{date_text}의 {shift} 최소 인원 기록이 없습니다."
+                )
+
     return rows
 
 
@@ -400,7 +413,8 @@ if __name__ == "__main__":
     else:
         print("읽은 데이터 행이 없습니다.")
 
-    requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_date_shift.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_date_shift.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/decimal_min_staff.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/negative_min_staff.csv"
