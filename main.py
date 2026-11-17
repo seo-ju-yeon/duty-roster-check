@@ -212,9 +212,12 @@ def read_schedule(file_path, allowed_shifts, start_date, end_date, registered_nu
     return rows
 
 
-def read_requirements(file_path, working_shifts):
-    """입력 구조·필수값·근무조·날짜를 확인하고 필요 인원 CSV의 행을 반환한다."""
+def read_requirements(file_path, working_shifts, start_date, end_date):
+    """입력 구조·필수값·근무조·날짜·검사 기간을 확인하고 행을 반환한다."""
     required_columns = ["date", "shift", "min_staff"]
+
+    if start_date > end_date:
+        raise ValueError("설정 오류: 검사 시작일이 종료일보다 늦습니다.")
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
@@ -298,6 +301,13 @@ def read_requirements(file_path, working_shifts):
                     f"날짜 형식이 YYYY-MM-DD가 아닙니다: {date_text!r}"
                 )
 
+            if not start_date <= requirement_date <= end_date:
+                raise ValueError(
+                    f"입력 오류: 필요 인원 CSV {reader.line_num}번째 줄의 "
+                    f"날짜가 검사 기간 밖입니다: {date_text!r} "
+                    f"(검사 기간: {start_date} ~ {end_date})"
+                )
+
             rows.append(row)
 
         return rows
@@ -354,12 +364,19 @@ if __name__ == "__main__":
         print("읽은 데이터 행이 없습니다.")
 
     requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/date_before_period.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/date_after_period.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/invalid_date.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/invalid_date_format.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/invalid_shift.csv"
 
     working_shifts = config["rules"]["working_shifts"]
-    requirements = read_requirements(requirements_path, working_shifts)
+    requirements = read_requirements(
+        requirements_path,
+        working_shifts,
+        start_date,
+        end_date,
+    )
 
     print(f"읽은 필요 인원 행 수: {len(requirements)}")
     if requirements:
