@@ -363,6 +363,13 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
     return rows
 
 
+def read_unavailability(file_path):
+    """근무 불가 날짜 CSV의 각 행을 딕셔너리로 읽어 반환한다."""
+    with open(file_path, mode="r", encoding="utf-8", newline="") as file:
+        reader = csv.DictReader(file)
+        return list(reader)
+
+
 if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parent
 
@@ -413,8 +420,8 @@ if __name__ == "__main__":
     else:
         print("읽은 데이터 행이 없습니다.")
 
-    # requirements_path = project_dir / "data/fixtures/small/requirements.csv"
-    requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_date_shift.csv"
+    requirements_path = project_dir / "data/fixtures/small/requirements.csv"
+    # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/missing_date_shift.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/duplicate_date_shift.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/decimal_min_staff.csv"
     # requirements_path = project_dir / "data/fixtures/small/input_cases/requirements/negative_min_staff.csv"
@@ -437,3 +444,11 @@ if __name__ == "__main__":
     print(f"읽은 필요 인원 행 수: {len(requirements)}")
     if requirements:
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
+
+    unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/header_only.csv"
+    unavailability = read_unavailability(unavailability_path)
+
+    print(f"읽은 근무 불가 날짜 행 수: {len(unavailability)}")
+    if unavailability:
+        print(f"첫 번째 근무 불가 날짜 행: {unavailability[0]}")
