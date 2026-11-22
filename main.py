@@ -364,9 +364,27 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
 
 
 def read_unavailability(file_path):
-    """근무 불가 날짜 CSV의 각 행을 딕셔너리로 읽어 반환한다."""
+    """필수 열을 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
+    required_columns = ["nurse_id", "date"]
+
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
+        fieldnames = reader.fieldnames
+
+        if fieldnames is None:
+            raise ValueError("입력 오류: 근무 불가 날짜 CSV에 헤더가 없습니다.")
+
+        missing_columns = []
+        for column in required_columns:
+            if column not in fieldnames:
+                missing_columns.append(column)
+
+        if missing_columns:
+            missing_text = ", ".join(missing_columns)
+            raise ValueError(
+                f"입력 오류: 근무 불가 날짜 CSV에 필수 열이 없습니다: {missing_text}"
+            )
+
         return list(reader)
 
 
@@ -446,6 +464,7 @@ if __name__ == "__main__":
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
 
     unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/missing_column.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/header_only.csv"
     unavailability = read_unavailability(unavailability_path)
 
