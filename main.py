@@ -364,7 +364,7 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
 
 
 def read_unavailability(file_path):
-    """필수 열을 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
+    """필수 열과 중복 열을 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
     required_columns = ["nurse_id", "date"]
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
@@ -383,6 +383,23 @@ def read_unavailability(file_path):
             missing_text = ", ".join(missing_columns)
             raise ValueError(
                 f"입력 오류: 근무 불가 날짜 CSV에 필수 열이 없습니다: {missing_text}"
+            )
+
+        seen_columns = set()
+        duplicate_columns = []
+
+        for column in fieldnames:
+            if column in seen_columns:
+                if column not in duplicate_columns:
+                    duplicate_columns.append(column)
+            else:
+                seen_columns.add(column)
+
+        if duplicate_columns:
+            duplicate_text = ", ".join(duplicate_columns)
+            raise ValueError(
+                f"입력 오류: 근무 불가 날짜 CSV에 "
+                f"중복된 열 이름이 있습니다: {duplicate_text}"
             )
 
         return list(reader)
@@ -464,6 +481,7 @@ if __name__ == "__main__":
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
 
     unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/duplicate_column.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/missing_column.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/header_only.csv"
     unavailability = read_unavailability(unavailability_path)
