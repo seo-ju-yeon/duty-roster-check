@@ -364,7 +364,7 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
 
 
 def read_unavailability(file_path):
-    """헤더·행별 열 개수·필수값을 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
+    """헤더·행별 열 개수·필수값·날짜를 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
     required_columns = ["nurse_id", "date"]
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
@@ -423,6 +423,23 @@ def read_unavailability(file_path):
                         f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
                         f"필수값이 비어 있습니다: {column}"
                     )
+
+            date_text = row["date"]
+
+            try:
+                unavailable_date = date.fromisoformat(date_text)
+            except ValueError:
+                raise ValueError(
+                    f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
+                    f"날짜가 올바르지 않습니다: {date_text!r} "
+                    "(YYYY-MM-DD 형식의 실제 날짜가 필요합니다.)"
+                )
+
+            if unavailable_date.isoformat() != date_text:
+                raise ValueError(
+                    f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
+                    f"날짜 형식이 YYYY-MM-DD가 아닙니다: {date_text!r}"
+                )
 
             rows.append(row)
 
@@ -505,13 +522,8 @@ if __name__ == "__main__":
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
 
     unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
-    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/empty_nurse_id.csv"
-    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/empty_date.csv"
-    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/too_many_fields.csv"
-    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/too_few_fields.csv"
-    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/duplicate_column.csv"
-    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/missing_column.csv"
-    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/header_only.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/invalid_date.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/invalid_date_format.csv"
     unavailability = read_unavailability(unavailability_path)
 
     print(f"읽은 근무 불가 날짜 행 수: {len(unavailability)}")
