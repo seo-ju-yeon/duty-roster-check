@@ -364,7 +364,7 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
 
 
 def read_unavailability(file_path):
-    """헤더와 행별 열 개수를 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
+    """헤더·행별 열 개수·필수값을 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
     required_columns = ["nurse_id", "date"]
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
@@ -416,6 +416,13 @@ def read_unavailability(file_path):
                     f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
                     "값 개수가 헤더의 열 개수보다 적습니다."
                 )
+
+            for column in required_columns:
+                if row[column].strip() == "":
+                    raise ValueError(
+                        f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
+                        f"필수값이 비어 있습니다: {column}"
+                    )
 
             rows.append(row)
 
@@ -498,6 +505,8 @@ if __name__ == "__main__":
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
 
     unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/empty_nurse_id.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/empty_date.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/too_many_fields.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/too_few_fields.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/duplicate_column.csv"
