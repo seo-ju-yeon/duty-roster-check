@@ -363,8 +363,8 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
     return rows
 
 
-def read_unavailability(file_path, start_date, end_date):
-    """입력 구조·필수값·날짜·검사 기간을 확인하고 근무 불가 날짜 행을 반환한다."""
+def read_unavailability(file_path, start_date, end_date, registered_nurse_ids):
+    """입력 구조·값·기간·간호사 참조를 확인하고 근무 불가 날짜 행을 반환한다."""
     required_columns = ["nurse_id", "date"]
 
     if start_date > end_date:
@@ -451,6 +451,14 @@ def read_unavailability(file_path, start_date, end_date):
                     f"(검사 기간: {start_date} ~ {end_date})"
                 )
 
+            nurse_id = row["nurse_id"]
+
+            if nurse_id not in registered_nurse_ids:
+                raise ValueError(
+                    f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
+                    f"간호사 ID가 기준 목록에 없습니다: {nurse_id!r}"
+                )
+
             rows.append(row)
 
         return rows
@@ -532,6 +540,7 @@ if __name__ == "__main__":
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
 
     unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/unknown_nurse.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/date_before_period.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/date_after_period.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/invalid_date.csv"
@@ -540,6 +549,7 @@ if __name__ == "__main__":
         unavailability_path,
         start_date,
         end_date,
+        registered_nurse_ids,
     )
 
     print(f"읽은 근무 불가 날짜 행 수: {len(unavailability)}")
