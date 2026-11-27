@@ -363,9 +363,12 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
     return rows
 
 
-def read_unavailability(file_path):
-    """헤더·행별 열 개수·필수값·날짜를 확인하고 근무 불가 날짜 CSV의 행을 반환한다."""
+def read_unavailability(file_path, start_date, end_date):
+    """입력 구조·필수값·날짜·검사 기간을 확인하고 근무 불가 날짜 행을 반환한다."""
     required_columns = ["nurse_id", "date"]
+
+    if start_date > end_date:
+        raise ValueError("설정 오류: 검사 시작일이 종료일보다 늦습니다.")
 
     with open(file_path, mode="r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
@@ -439,6 +442,13 @@ def read_unavailability(file_path):
                 raise ValueError(
                     f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
                     f"날짜 형식이 YYYY-MM-DD가 아닙니다: {date_text!r}"
+                )
+
+            if not start_date <= unavailable_date <= end_date:
+                raise ValueError(
+                    f"입력 오류: 근무 불가 날짜 CSV {reader.line_num}번째 줄의 "
+                    f"날짜가 검사 기간 밖입니다: {date_text!r} "
+                    f"(검사 기간: {start_date} ~ {end_date})"
                 )
 
             rows.append(row)
@@ -522,9 +532,15 @@ if __name__ == "__main__":
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
 
     unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/date_before_period.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/date_after_period.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/invalid_date.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/invalid_date_format.csv"
-    unavailability = read_unavailability(unavailability_path)
+    unavailability = read_unavailability(
+        unavailability_path,
+        start_date,
+        end_date,
+    )
 
     print(f"읽은 근무 불가 날짜 행 수: {len(unavailability)}")
     if unavailability:
