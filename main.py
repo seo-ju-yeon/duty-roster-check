@@ -364,7 +364,7 @@ def read_requirements(file_path, working_shifts, start_date, end_date, nurse_cou
 
 
 def read_unavailability(file_path, start_date, end_date, registered_nurse_ids):
-    """입력 구조·값·기간·간호사 참조를 확인하고 근무 불가 날짜 행을 반환한다."""
+    """입력값·간호사 참조·간호사와 날짜의 중복을 확인하고 행을 반환한다."""
     required_columns = ["nurse_id", "date"]
 
     if start_date > end_date:
@@ -406,6 +406,7 @@ def read_unavailability(file_path, start_date, end_date, registered_nurse_ids):
             )
 
         rows = []
+        row_line_numbers = []
 
         for row in reader:
             if None in row:
@@ -460,8 +461,26 @@ def read_unavailability(file_path, start_date, end_date, registered_nurse_ids):
                 )
 
             rows.append(row)
+            row_line_numbers.append(reader.line_num)
 
-        return rows
+    first_line_by_key = {}
+
+    for row, line_number in zip(rows, row_line_numbers):
+        nurse_id = row["nurse_id"]
+        date_text = row["date"]
+        key = (nurse_id, date_text)
+
+        if key in first_line_by_key:
+            first_line = first_line_by_key[key]
+            raise ValueError(
+                f"입력 오류: 근무 불가 날짜 CSV {line_number}번째 줄의 "
+                f"간호사·날짜 기록이 중복입니다: {nurse_id}, {date_text} "
+                f"(첫 기록: {first_line}번째 줄)"
+            )
+
+        first_line_by_key[key] = line_number
+
+    return rows
 
 
 if __name__ == "__main__":
@@ -539,7 +558,8 @@ if __name__ == "__main__":
     if requirements:
         print(f"첫 번째 필요 인원 행: {requirements[0]}")
 
-    unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    # unavailability_path = project_dir / "data/fixtures/small/unavailability.csv"
+    unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/duplicate_nurse_date.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/unknown_nurse.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/date_before_period.csv"
     # unavailability_path = project_dir / "data/fixtures/small/input_cases/unavailability/date_after_period.csv"
